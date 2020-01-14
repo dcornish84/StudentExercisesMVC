@@ -136,17 +136,64 @@ namespace StudentExercisesMVC.Controllers
         // GET: Exercises/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT Id, ExerciseName, ProgrammingLanguage
+                                         FROM Exercise
+                                         WHERE Id = @id";
+
+                    cmd.Parameters.Add(new SqlParameter("Id", id));
+
+                    var reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        var exercise = new Exercise
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            ExerciseName = reader.GetString(reader.GetOrdinal("ExerciseName")),
+                            ProgrammingLanguage = reader.GetString(reader.GetOrdinal("ProgrammingLanguage"))
+
+                        };
+
+                        reader.Close();
+                        return View(exercise);
+                    }
+
+                    reader.Close();
+                    return NotFound();
+                }
+            }
+
         }
 
         // POST: Exercises/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, Exercise exercise)
         {
             try
             {
-                // TODO: Add update logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"UPDATE Exercise
+                                            SET ExerciseName = @exerciseName,
+                                                ProgrammingLanguage = @programmingLanguage
+                                            WHERE Id = @id";
+
+                        cmd.Parameters.Add(new SqlParameter("@exerciseName", exercise.ExerciseName));
+                        cmd.Parameters.Add(new SqlParameter("@programmingLanguage", exercise.ProgrammingLanguage));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
