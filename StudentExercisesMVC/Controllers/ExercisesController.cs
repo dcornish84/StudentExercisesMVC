@@ -206,19 +206,61 @@ namespace StudentExercisesMVC.Controllers
         // GET: Exercises/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT ExerciseName, ProgrammingLanguage, Id FROM Exercise WHERE Id = @id";
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    var reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        var exercise = new Exercise
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            ExerciseName = reader.GetString(reader.GetOrdinal("ExerciseName")),
+                            ProgrammingLanguage = reader.GetString(reader.GetOrdinal("ProgrammingLanguage"))
+                        };
+
+                        reader.Close();
+                        return View(exercise);
+                    }
+
+                    return NotFound();
+                }
+            }
+
         }
 
         // POST: Exercises/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+       
+        public ActionResult Delete([FromRoute]int id, Exercise exercise)
         {
             try
             {
-                // TODO: Add delete logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"DELETE FROM Exercise WHERE Id = @id";
 
-                return RedirectToAction(nameof(Index));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        cmd.ExecuteNonQuery();
+
+                        return RedirectToAction(nameof(Index));
+
+                    }
+                }
+
+
             }
             catch
             {
