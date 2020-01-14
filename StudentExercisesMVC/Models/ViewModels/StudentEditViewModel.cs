@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace StudentExercisesMVC.Models.ViewModels
 {
-    public class StudentViewModels
+    public class StudentEditViewModel
     {
         public Student Student { get; set; }
 
         public List<SelectListItem> Cohorts { get; set; }
 
-       
+        public List<SelectListItem> Exercises { get; set; }
     }
 }
