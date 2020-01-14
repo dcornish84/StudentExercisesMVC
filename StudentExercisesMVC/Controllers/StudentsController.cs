@@ -331,7 +331,7 @@ namespace StudentExercisesMVC.Controllers
 
 
 
-        //helper methods
+        //Helper Methods------------------------------------
         private List<Cohort> GetCohorts()
         {
             using (SqlConnection conn = Connection)
